@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Intelligence | Premium Directory</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #10b981;
+            --secondary: #1e293b;
+            --accent: #f59e0b;
+            --bg: #f8fafc;
+            --white: #ffffff;
+            --border: #e2e8f0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body { background: var(--bg); color: var(--secondary); padding: 30px 15px; }
+
+        .container { max-width: 1400px; margin: 0 auto; }
+
+        /* Dashboard Header */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .header h1 { font-size: 1.8rem; font-weight: 800; color: var(--secondary); letter-spacing: -0.5px; }
+
+        .stats { display: flex; gap: 15px; }
+        .stat-chip { background: var(--white); padding: 8px 16px; border-radius: 50px; border: 1px solid var(--border); font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .stat-chip i { color: var(--primary); }
+
+        /* Search & Filter Bar */
+        .controls { background: var(--white); padding: 20px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; gap: 15px; margin-bottom: 25px; align-items: center; }
+        .search-box { flex: 1; position: relative; }
+        .search-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+        input, select { width: 100%; padding: 12px 15px 12px 42px; border: 1px solid var(--border); border-radius: 12px; font-size: 0.95rem; background: #fcfcfc; transition: 0.2s; }
+        input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1); }
+
+        /* Professional Table */
+        .table-wrap { background: var(--white); border-radius: 16px; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); border: 1px solid var(--border); }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f8fafc; padding: 16px 20px; text-align: left; font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 700; border-bottom: 1px solid var(--border); }
+        td { padding: 16px 20px; border-bottom: 1px solid var(--border); font-size: 0.9rem; vertical-align: middle; }
+        tr:hover { background-color: #f1f5f9; }
+
+        /* UI Components */
+        .doc-profile { display: flex; align-items: center; gap: 12px; }
+        .avatar { width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #10b981, #059669); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; }
+        .name { font-weight: 700; color: #0f172a; display: block; }
+        .spec { font-size: 0.75rem; color: #64748b; font-weight: 500; }
+
+        .tag { padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; }
+        .tag-exp { background: #eff6ff; color: #1e40af; }
+        .tag-fee { background: #ecfdf5; color: #065f46; }
+
+        .rating { color: #f59e0b; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; gap: 4px; }
+        .btn-view { color: var(--primary); text-decoration: none; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; gap: 4px; transition: 0.2s; }
+        .btn-view:hover { color: #059669; transform: translateX(3px); }
+
+        @media (max-width: 900px) { th:nth-child(4), td:nth-child(4), th:nth-child(5), td:nth-child(5) { display: none; } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1><i class="fa-solid fa-stethoscope"></i> Doctor Intelligence</h1>
+        <div class="stats">
+            <div class="stat-chip"><i class="fa fa-users"></i> 25 Specialists</div>
+            <div class="stat-chip"><i class="fa fa-star"></i> 4.8 Avg Rating</div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <div class="search-box">
+            <i class="fa fa-magnifying-glass"></i>
+            <input type="text" id="searchInput" placeholder="Search by name, clinic, or qualification...">
+        </div>
+        <select id="specFilter" style="flex: 0.4; padding-left: 15px;">
+            <option value="all">All Specialties</option>
+            <option value="OB-GYN">OB-GYN</option>
+            <option value="Physician">Physician</option>
+        </select>
+    </div>
+
+    <div class="table-wrap">
+        <table id="docTable">
+            <thead>
+                <tr>
+                    <th>Specialist Profile</th>
+                    <th>Experience</th>
+                    <th>Fee</th>
+                    <th>Hospital / Location</th>
+                    <th>Success Score</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const doctors = [
+        { n: "Dr. SRUJANA LAKSHMI S N", s: "OB-GYN", e: "5 Yrs", f: "₹850", h: "Apollo Clinic, Marathahalli", q: "MBBS, MS", r: "4.9", l: "https://www.practo.com/bangalore/doctor/dr-srujana-lakshmi-s-n-gynecologist-obstetrician" },
+        { n: "Dr. APARNA JHA", s: "OB-GYN", e: "19 Yrs", f: "₹1000", h: "Apollo Cradle, Whitefield", q: "MBBS, MS, DNB", r: "4.8", l: "https://www.practo.com/bangalore/doctor/dr-aparna-jha-gynecologist-obstetrician-general-physician" },
+        { n: "Dr. APOORVA M", s: "General Physician", e: "6 Yrs", f: "₹300", h: "Suhasini Maternity, Kengeri", q: "MBBS", r: "4.7", l: "https://www.practo.com/bangalore/doctor/dr-apoorva-m-ayurvedic-endocrinologist" },
+        { n: "Dr. AVULA LAKSHMI NETHRA", s: "OB-GYN", e: "2 Yrs", f: "₹850", h: "Apollo, Kundalahalli", q: "MBBS, DGO", r: "4.6", l: "https://www.apollo247.com/doctors/dr-avula-lakshmi-nethra-lakshmi-nethra-66672097-888f-4d18-b7f2-d6ad4bc79761" },
+        { n: "Dr. Apurva C. Sankratti", s: "General Physician", e: "4 Yrs", f: "₹500", h: "Bengaluru Central", q: "MBBS", r: "4.5", l: "https://www.practo.com/athani/doctor/apurva-channappa-sankratti-general-physician" },
+        { n: "Dr. Bhuvana N", s: "Laparoscopic Surgeon", e: "20 Yrs", f: "₹500", h: "Dhyeya Clinic, Hebbal", q: "MBBS, MS", r: "4.8", l: "https://www.practo.com/bangalore/doctor/dr-bhuvana-shri-niranjanamurthy-gynecologist-obstetrician" },
+        { n: "Dr. Garima Jain", s: "OB-GYN", e: "28 Yrs", f: "₹1000", h: "Apollo Cradle, Brookefield", q: "MBBS, DNB", r: "4.9", l: "https://www.practo.com/bangalore/doctor/dr-garima-jain-gynecologist-obstetrician" },
+        { n: "Dr. KANTI SAHU", s: "OB-GYN", e: "30 Yrs", f: "₹850", h: "Apollo Med, Marathahalli", q: "MBBS, MD", r: "4.7", l: "https://www.practo.com/bangalore/doctor/dr-kanti-sahu-3-gynecologist-obstetrician" },
+        { n: "Dr. KAVITHA REDDY", s: "OB-GYN", e: "24 Yrs", f: "₹1000", h: "Apollo Cradle, Whitefield", q: "MBBS, MD", r: "4.8", l: "https://www.practo.com/bangalore/doctor/dr-kavitha-v-reddy-gynecologist-obstetrician-1" },
+        { n: "Dr. KEERTHPRIYA PUNUGUNTA", s: "General Physician", e: "6 Yrs", f: "₹600", h: "Tele-Health / Online", q: "MBBS", r: "4.6", l: "https://www.practo.com/nellore/doctor/punugunta-keerthy-priya-general-physician" },
+        { n: "Dr. MANSA REDDY", s: "Infertility Specialist", e: "14 Yrs", f: "₹600", h: "Ankura Hospital", q: "MBBS, MS", r: "4.8", l: "https://www.practo.com/hyderabad/doctor/manasa-reddy-gynecologist-obstetrician-1" },
+        { n: "Dr. MUJASIM SULTHANA", s: "OB-GYN", e: "12 Yrs", f: "₹700", h: "Apollo Clinic, Bengaluru", q: "MBBS, DNB", r: "4.7", l: "https://www.practo.com/bangalore/doctor/dr-mujasim-sulthana-gynecologist-obstetrician" },
+        { n: "Dr. NIKITA SINGH", s: "OB-GYN", e: "11 Yrs", f: "₹800", h: "Indira IVF, Whitefield", q: "MBBS, MS", r: "4.8", l: "https://www.practo.com/bangalore/doctor/nikita-singh-gynecologist-obstetrician" },
+        { n: "Dr. Pooja Pooja", s: "General Physician", e: "8 Yrs", f: "₹400", h: "Victoria Hospital", q: "MBBS", r: "4.5", l: "https://www.practo.com/bangalore/doctor/pooja-75-general-physician" },
+        { n: "Dr. Revathi SRUNGAVARAPU", s: "OB-GYN", e: "15 Yrs", f: "₹700", h: "Electronic City", q: "MBBS, DNB", r: "4.7", l: "https://www.practo.com/bangalore/doctor/dr-revathi-s-gynecologist-obstetrician" },
+        { n: "Dr. S SRI DIVYA", s: "Dermatologist", e: "10 Yrs", f: "₹900", h: "Oliva Clinic", q: "MBBS, MD", r: "4.9", l: "https://www.practo.com/hyderabad/doctor/sri-divya-dermatologist" },
+        { n: "Dr. SNEHA PAVITHRAN", s: "OB-GYN", e: "11 Yrs", f: "₹750", h: "Mannat Fertility", q: "MBBS, MS", r: "4.8", l: "https://www.practo.com/bangalore/doctor/sneha-pavithran-gynecologist-obstetrician-1" },
+        { n: "Dr. SRIPRIYA SRIDHAR", s: "General Physician", e: "28 Yrs", f: "₹1000", h: "Apollo Bannerghatta", q: "MBBS, MD", r: "4.7", l: "https://www.practo.com/chennai/doctor/sripriya-chenakeswarar-sridhar-general-physician" },
+        { n: "Dr. Teena Thomas", s: "OB-GYN", e: "28 Yrs", f: "₹1000", h: "Apollo Cradle, Varthur", q: "MBBS, DNB", r: "4.9", l: "https://www.practo.com/bangalore/doctor/dr-teena-thomas-gynecologist-obstetrician-gynecologist-obstetrician" },
+        { n: "Dr. USHA T", s: "General Medicine", e: "20 Yrs", f: "₹1000", h: "Trilife Hospital", q: "MBBS, MD", r: "4.8", l: "https://www.practo.com/bangalore/doctor/dr-usha-b-r" },
+        { n: "Dr. VENKATA RAMYA KRISHNA", s: "OB-GYN", e: "11 Yrs", f: "₹1000", h: "Apollo Cradle", q: "MBBS, MS", r: "4.8", l: "https://www.practo.com/bangalore/doctor/ramya-krishna-m-v-gynecologist-obstetrician" },
+        { n: "Dr. VENKATA RAMYA KRISHNA M.", s: "OB-GYN", e: "11 Yrs", f: "₹1000", h: "PVR Polyclinic", q: "MBBS, DGO", r: "4.7", l: "https://www.practo.com/bangalore/doctor/ramya-krishna-m-v-gynecologist-obstetrician" },
+        { n: "Dr. VIBHAWARI D.", s: "OB-GYN Oncology", e: "14 Yrs", f: "₹800", h: "Bengaluru Oncology", q: "MBBS, MS, MCh", r: "4.9", l: "https://www.credihealth.com/doctor/vibhawari-dhakharia-gynecologic-oncologist" },
+        { n: "Dr. VIDYA SHREE", s: "OB-GYN", e: "10 Yrs", f: "₹700", h: "Bengaluru West", q: "MBBS, MS", r: "4.8", l: "https://www.practo.com/bangalore/doctor/dr-vidya-v-gynecologist-obstetrician" },
+        { n: "Dr. Vishnu Padma P.", s: "OB-GYN", e: "8 Yrs", f: "₹600", h: "Bengaluru South", q: "MBBS, MS", r: "4.6", l: "https://www.practo.com/bangalore/doctor/dr-vishnu-padma-pujitha-k-gynecologist-obstetrician" }
+    ];
+
+    function render(data) {
+        const body = document.getElementById('tableBody');
+        body.innerHTML = data.map(doc => `
+            <tr>
+                <td>
+                    <div class="doc-profile">
+                        <div class="avatar">${doc.n.split(' ').filter(x => x.length > 2)[1]?.charAt(0) || 'D'}</div>
+                        <div>
+                            <span class="name">${doc.n}</span>
+                            <span class="spec">${doc.s}</span>
+                        </div>
+                    </div>
+                </td>
+                <td><span class="tag tag-exp">${doc.e} Experience</span></td>
+                <td><span class="tag tag-fee">${doc.f}</span></td>
+                <td><i class="fa fa-location-dot" style="color: #cbd5e1; margin-right: 5px;"></i> ${doc.h}</td>
+                <td><div class="rating"><i class="fa fa-star"></i> ${doc.r} <span style="font-weight: 500; color: #94a3b8; font-size: 0.7rem;">(Verified)</span></div></td>
+                <td><a href="${doc.l}" target="_blank" class="btn-view">Details <i class="fa fa-chevron-right"></i></a></td>
+            </tr>
+        `).join('');
+    }
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+        const val = e.target.value.toLowerCase();
+        render(doctors.filter(d => d.n.toLowerCase().includes(val) || d.h.toLowerCase().includes(val) || d.q.toLowerCase().includes(val)));
+    });
+
+    document.getElementById('specFilter').addEventListener('change', (e) => {
+        const val = e.target.value;
+        render(val === 'all' ? doctors : doctors.filter(d => d.s.includes(val)));
+    });
+
+    render(doctors);
+</script>
+</body>
+</html>
